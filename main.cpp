@@ -434,13 +434,19 @@ public:
 
 std::string jS(const std::string& s) {
     std::string o = "\"";
-    for (char c : s) {
+    for (unsigned char c : s) {
         if      (c == '"')  o += "\\\"";
         else if (c == '\\') o += "\\\\";
         else if (c == '\n') o += "\\n";
         else if (c == '\r') o += "\\r";
         else if (c == '\t') o += "\\t";
-        else                o += c;
+        else if (c < 0x20) {
+            // Escape all other control characters as \uXXXX
+            char buf[8];
+            std::snprintf(buf, sizeof(buf), "\\u%04x", c);
+            o += buf;
+        }
+        else                o += (char)c;
     }
     return o + '"';
 }
@@ -565,13 +571,18 @@ class OllamaClient {
     // Escape a string for embedding inside a JSON string literal
     std::string esc(const std::string& s) {
         std::string o;
-        for (char c : s) {
+        for (unsigned char c : s) {
             if      (c == '"')  o += "\\\"";
             else if (c == '\\') o += "\\\\";
             else if (c == '\n') o += "\\n";
             else if (c == '\r') o += "\\r";
             else if (c == '\t') o += "\\t";
-            else                o += c;
+            else if (c < 0x20) {
+                char buf[8];
+                std::snprintf(buf, sizeof(buf), "\\u%04x", c);
+                o += buf;
+            }
+            else                o += (char)c;
         }
         return o;
     }

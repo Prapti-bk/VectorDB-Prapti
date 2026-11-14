@@ -351,7 +351,12 @@ button {
 // ════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════════
-const API  = 'http://localhost:8080';
+// Auto-detect: on Railway/production the frontend is served from the same
+// origin as the backend, so we use a relative base URL.  On localhost we
+// fall back to the hard-coded dev address.
+const API  = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+             ? 'http://localhost:8080'
+             : '';
 const DIMS = 16;
 const COL  = { cs:'#38BDF8', math:'#7FA8E8', food:'#F59E0B', sports:'#22C55E', doc:'#5EEAD4', default:'#94A4BD' };
 const DIM_COL = ['#38BDF8','#38BDF8','#38BDF8','#38BDF8','#7FA8E8','#7FA8E8','#7FA8E8','#7FA8E8',
@@ -852,8 +857,7 @@ async function askAI() {
       },18);
     }
 
-    if (!d.error) { /* already appended above */ }
-    else history.appendChild(aDiv);
+    if (d.error) history.appendChild(aDiv);
 
   } catch(e) {
     thinkDiv.remove();
